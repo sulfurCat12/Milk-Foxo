@@ -1,4 +1,5 @@
 require('dotenv').config();
+const { exec } = require('child_process');
 const { Client, IntentsBitField, AttachmentBuilder } = require('discord.js');
 
 const client = new Client({
@@ -51,15 +52,58 @@ client.on('messageCreate', async function (message){
         await message.reply(data.joke);
     }
 
+    // foxo qr ---
+    if (message.content.startsWith(`${prefix}qr `)) {  
+        const qrcode = message.content;  
+        const qrtext = message.content.slice((`${prefix}qr `).length).trim(); 
+        const qrImage = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(qrtext)}`;
+      
+
+        const attachment = new AttachmentBuilder(qrImage, { name: 'qrImage.png' });  
+        await message.channel.send({ files: [attachment] });  
+    }
+
+    // foxo cat
+    if (message.content === `${prefix}cat`) {
+        const catAPI = 'https://api.thecatapi.com/v1/images/search?';
+
+        try {
+            const response = await fetch(catAPI);
+            const data = await response.json();
+            const catImage = data[0].url;
+
+            const attachment = new AttachmentBuilder(catImage, { name: 'catImage.png' });
+            await message.channel.send({ files: [attachment] });            
+        } catch (err){
+            message.reply(">    \`Failed to fetch Cat\`\n>    \`[" + err + "]\`")
+        }
+    }
+
+    // foxo fox
+    if (message.content === `${prefix}fox`) {
+        const foxAPI = 'https://randomfox.ca/floof/';
+
+        try {
+            const response = await fetch(foxAPI);
+            const data = await response.json();
+            const foxImage = data.image
+
+            const attachment = new AttachmentBuilder(foxImage, { name: 'foxImage.png' });
+            await message.channel.send({ files: [attachment] });
+        } catch (err){
+            message.reply(">    \`Failed to fetch Fox\`\n>    \`[" + err + "]\`")
+        }
+    }
+
     // foxo init
     if (message.content === `${prefix}init`) {
-        const raw = fs.readFileSync(filePath, 'utf8');
+        const raw = await fs.readFileSync(filePath, 'utf8');
         const data = JSON.parse(raw);
 
         if (!data.users) data.users = {};
 
         if (data.users[message.author.id]){
-            await message.reply("You already have a Fox Wallet!");
+            await message.reply(">    You already have a Fox Wallet!");
             return;
         }
 
@@ -71,7 +115,13 @@ client.on('messageCreate', async function (message){
         fs.writeFileSync(filePath, JSON.stringify(data, null, 2), 'utf8');
 
         const balance = data.users[message.author.id].Money;
-        await message.reply(`Your Fox Wallet has been initialized!\nYou currently have \`${balance}\` fox coins in your wallet.`);
+
+        try {
+            await message.reply(`>    Your Fox Wallet has been initialized!\n>    You currently have \`${balance}\` fox coins in your wallet.`);
+            console.log("Bot has replied!");
+        } catch(err) {
+            await message.reply("Failed to reply: " + err);
+        }
     }
 
     // foxo wallet
@@ -80,14 +130,16 @@ client.on('messageCreate', async function (message){
         const data = JSON.parse(raw);
 
         if (!data.users || !data.users[message.author.id]) {
-            await message.reply("You don't have a Fox Wallet yet!\nUse `foxo init` to create one.");
+            await message.reply(">    You don't have a Fox Wallet yet!\n>    Use `foxo init` to create one.");
             return;
         }
 
         const balance = data.users[message.author.id].Money;
-        await message.reply(`Foxo Wallet: \`${balance}\``);
+        await message.reply(`>    Foxo Wallet: \`${balance}\``);
     }
 
+    // foxo dice 000
+    if (message.content.startsWith(`${prefix}dice`)){}
 });
 // - - -
 
