@@ -18,7 +18,7 @@ client.on('ready', function (c){
 
 
 // Commands
-const prefix = "foxo "
+const prefix = "foxo ";
 
 client.on('messageCreate', async function (message){
     if (message.author.bot) return;
@@ -95,6 +95,8 @@ client.on('messageCreate', async function (message){
         }
     }
 
+
+
     // foxo init
     if (message.content === `${prefix}init`) {
         const raw = await fs.readFileSync(filePath, 'utf8');
@@ -116,12 +118,8 @@ client.on('messageCreate', async function (message){
 
         const balance = data.users[message.author.id].Money;
 
-        try {
-            await message.reply(`>    Your Fox Wallet has been initialized!\n>    You currently have \`${balance}\` fox coins in your wallet.`);
-            console.log("Bot has replied!");
-        } catch(err) {
-            await message.reply("Failed to reply: " + err);
-        }
+        await message.reply(`>    Your Fox Wallet has been initialized!\n>    You currently have \`${balance}\` fox coins in your wallet.`);
+        console.log("Bot has replied!");
     }
 
     // foxo wallet
@@ -138,8 +136,20 @@ client.on('messageCreate', async function (message){
         await message.reply(`>    Foxo Wallet: \`${balance}\``);
     }
 
-    // foxo dice 000
-    if (message.content.startsWith(`${prefix}dice`)){}
+
+
+    // foxo flipcoin 000
+    if (message.content.startsWith(`${prefix}flipcoin `)){
+        const raw = fs.readFileSync(filePath, 'utf8');
+        const data = JSON.parse(raw);
+
+        if (!data.users || !data.users[message.author.id]) {
+            await message.reply(">    You don't have a Fox Wallet yet!\n>    Use `foxo init` to create one.");
+            return;
+        }
+
+        
+    }
 });
 // - - -
 
