@@ -22,9 +22,9 @@ async function loadUserIDs() {
     const usernameDisplay = document.getElementById("usernameDisplay");
     const userIDDisplay = document.getElementById("userIDDisplay");
     const joinDateDisplay = document.getElementById("joinDateDisplay");
-    const avatarDisplay = document.getElementById("avatarDisplay");
-    const bannerDisplay = document.getElementById("bannerDisplay");
     const colourDisplay = document.getElementById("colourDisplay");
+    
+    
 
     const userPic = document.getElementById("userPic");
     const viewAvatarBTN = document.getElementById("viewAvatar");
@@ -41,7 +41,10 @@ async function loadUserIDs() {
         usernameDisplay.innerHTML = `Username: ${userData.Username}`;
         userIDDisplay.innerHTML = `User ID: ${userData.UserID}`;
         joinDateDisplay.innerHTML = `Join Date: ${userData.Join_Date}`;
-        colourDisplay.innerHTML = `Profile Colour: ${userData.Profile_Colour}`;
+        colourDisplay.innerHTML = `Profile Colour: <span id="proColour">${userData.Profile_Colour}</span>`;
+
+        const proColour = document.getElementById("proColour");
+        proColour.style.color = userData.Profile_Colour;
 
         userPic.src = userData.Avatar_URL;
         viewAvatarBTN.href = userData.Avatar_URL + "?size=2048";
