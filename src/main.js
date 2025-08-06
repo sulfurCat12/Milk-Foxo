@@ -1,5 +1,4 @@
 require('dotenv').config();
-const { exec } = require('child_process');
 const { Client, IntentsBitField, AttachmentBuilder } = require('discord.js');
 
 const client = new Client({

@@ -1,0 +1,59 @@
+.header {
+    background-color: #475f9e;
+    border-radius: 10px;
+    padding: 5px;
+}
+
+.centerWrapper {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+}
+
+.content {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+}
+
+.infoDisplay {
+    background-color: #1C212C;
+    width: fit-content;
+    padding: 25px;
+    border-radius: 10px;
+    display: flex;
+    align-items: flex-start;
+    gap: 20px;
+    text-align: left;
+}
+
+.Profile-Picture {
+    width: 100px;
+    height: 100px;
+    border-radius: 10px;
+}
+
+.userText {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.buttons {
+    display: flex;
+    gap: 10px;
+}
+
+.button {
+    background-color: #475f9e;
+    color: #F0F1F3;
+    text-decoration: none;
+    padding: 8px;
+    border-radius: 8px;
+}
+
+.button:hover {
+    background-color: #5977c0;
+    cursor: pointer;
+}
