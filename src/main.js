@@ -100,7 +100,6 @@ client.on('messageCreate', async function (message){
 
 
     // Utilities - -
-
     // foxo viewavatar
     if (content.startsWith(`${prefix}viewavatar`)) {
         try {
@@ -128,6 +127,17 @@ client.on('messageCreate', async function (message){
         } catch (err) {
             message.reply(`>    \`Failed to fetch Avatar\`\n>    \`[${err}]\``);
         }
+    }
+
+    // foxo viewicon
+    if (content === `${prefix}viewicon`) {
+        const icon = message.guild.iconURL({ dynamic: true, size: 2048 });
+        const attachment = new AttachmentBuilder(icon, { name: 'icon.png' });
+
+        message.reply({
+            content: message.guild.name,
+            files: [attachment]
+        });
     }
 
     // foxo userinfo
@@ -245,8 +255,52 @@ client.on('messageCreate', async function (message){
             message.reply(`>    \`Failed to save User Info\`\n>    \`[${err}]\``);
         }
     }
+
+    // foxo serverinfo
+    if (content === `${prefix}serverinfo`) {
+
+
+
+        const channels = await message.guild.channels.fetch();
+
+        const textChannels = channels.filter(channel =>
+            channel.type === 0 ||
+            channel.type === 5
+        );
+
+        const voiceChannels = channels.filter(channel =>
+            channel.type === 2 ||
+            channel.type === 13
+        );
+
+        const categories = channels.filter(channel =>
+            channel.type === 4
+        );
+
+        const total = channels.size;
+
+
+        const roles = await message.guild.roles.fetch();
+
+
+        const allMembers = await message.guild.members.fetch();
+        const bots = allMembers.filter(m => m.user.bot);
+        const members = allMembers.filter(m => !m.user.bot);
+
+
+
+        const embed = new EmbedBuilder()
+            .setTitle(message.guild.name)
+            .setDescription(`**ID**: \`${message.guild.id}\`\n**Owner**: <@${message.guild.ownerId}>\n**Creation Date**: <t:${Math.floor(message.guild.createdTimestamp / 1000)}:F>\n\n**Members**\nTotal:\`${message.guild.memberCount}\`\nMembers: \`${members.size}\`\nBots: \`${bots.size}\`\n\n**Channels**\nTotal: \`${total}\`\nText Channels: \`${textChannels.size}\`\nVoice Chat Channels: \`${voiceChannels.size}\`\nCategories: \`${categories.size}\`\n\n**Roles**: \`${roles.size}\`\n**Emoji**: \`${message.guild.emojis.cache.size}\`\n\n**Verification Level**: \`${message.guild.verificationLevel}\``)
+            .setThumbnail(message.guild.iconURL())
+            .setColor('#00B0F4');
+            
+
+        await message.reply({ embeds: [embed] });
+    }
 });
 // - - -
+
 
 
 // Help / Command List
@@ -265,7 +319,9 @@ client.on('messageCreate', async function (message){
         "fox": "Get a random picture of a cute fox!",
 
         "viewavatar": "View a user's profile picture.",
-        "userinfo": "List of user's basic informations"
+        "viewicon": "View the server's icon.",
+        "userinfo": "List of user's basic informations",
+        "serverinfo": "List of server informations—members, channels, etc."
     };
 
     // foxo -h SPECIFIC_COMMAND
@@ -288,7 +344,7 @@ client.on('messageCreate', async function (message){
     if (content === `${prefix}ls`) {
         const embed = new EmbedBuilder()
             .setTitle("Command List")
-            .setDescription(`\`foxo ls\` — List of **Milk Foxo**'s available commands.\n\n\`foxo ping\` — Ping pong!\n\`foxo joke\` — Get a random joke.\n\`foxo qr\` — Generate a QR code.\n\`foxo cat\` — Get a random picture of a cute catze.\n\`foxo fox\` — Get a random image of a cute fox.\n\n\`foxo viewavatar\` — View a user's profile picture.\n\`foxo userinfo\` — List of user's basic informations.`)
+            .setDescription(`\`foxo ls\` — List of **Milk Foxo**'s available commands.\n\n\`foxo ping\` — Ping pong!\n\`foxo joke\` — Get a random joke.\n\`foxo qr\` — Generate a QR code.\n\`foxo cat\` — Get a random picture of a cute katze.\n\`foxo fox\` — Get a random image of a cute fox.\n\n\`foxo viewavatar\` — View a user's profile picture.\n\`foxo viewicon\` — View the server's icon.\n\`foxo userinfo\` — List of user's basic informations.\n\`foxo serverinfo\` — List of server informations—members, channels, etc.`)
             .setColor('#00B0F4');
 
         await message.reply({ embeds: [embed] });
