@@ -26,14 +26,15 @@ client.on('messageCreate', async function (message){
     if (message.author.bot) return;
 
 
+    const content = message.content.toLowerCase();
 
     // foxo greet
-    if (message.content === `${prefix}greet`) {
+    if (content === `${prefix}greet`) {
         await message.reply(`Hello there, ${message.author.tag}!`);
     }
 
     // foxo ping
-    if (message.content === `${prefix}ping`) {
+    if (content === `${prefix}ping`) {
         const start = Date.now();
         const msg = await message.reply('Pinging…');
         const roundTrip = Date.now() - start;
@@ -42,7 +43,7 @@ client.on('messageCreate', async function (message){
     }
 
     // foxo joke
-    if (message.content === `${prefix}joke`) {
+    if (content === `${prefix}joke`) {
         const response = await fetch('https://icanhazdadjoke.com/', {
             headers: { 'Accept': 'application/json' }
         });
@@ -51,18 +52,21 @@ client.on('messageCreate', async function (message){
     }
 
     // foxo qr ---
-    if (message.content.startsWith(`${prefix}qr `)) {  
+    if (content.startsWith(`${prefix}qr `)) {  
         const qrcode = message.content;  
         const qrtext = message.content.slice((`${prefix}qr `).length).trim(); 
         const qrImage = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(qrtext)}`;
       
 
         const attachment = new AttachmentBuilder(qrImage, { name: 'qrImage.png' });  
-        await message.channel.send({ files: [attachment] });  
+        await message.reply({
+            content: `QR Code for __${qrtext}__`,
+            files: [attachment]
+        });  
     }
 
     // foxo cat
-    if (message.content === `${prefix}cat`) {
+    if (content === `${prefix}cat`) {
         const catAPI = 'https://api.thecatapi.com/v1/images/search?';
 
         try {
@@ -71,14 +75,14 @@ client.on('messageCreate', async function (message){
             const catImage = data[0].url;
 
             const attachment = new AttachmentBuilder(catImage, { name: 'catImage.png' });
-            await message.channel.send({ files: [attachment] });            
+            await message.reply({ files: [attachment] });            
         } catch (err){
             message.reply(">    \`Failed to fetch Cat\`\n>    \`[" + err + "]\`")
         }
     }
 
     // foxo fox
-    if (message.content === `${prefix}fox`) {
+    if (content === `${prefix}fox`) {
         const foxAPI = 'https://randomfox.ca/floof/';
 
         try {
@@ -87,7 +91,7 @@ client.on('messageCreate', async function (message){
             const foxImage = data.image
 
             const attachment = new AttachmentBuilder(foxImage, { name: 'foxImage.png' });
-            await message.channel.send({ files: [attachment] });
+            await message.reply({ files: [attachment] });
         } catch (err){
             message.reply(">    \`Failed to fetch Fox\`\n>    \`[" + err + "]\`")
         }
@@ -98,7 +102,7 @@ client.on('messageCreate', async function (message){
     // Utilities - -
 
     // foxo viewavatar
-    if (message.content.startsWith(`${prefix}viewavatar`)) {
+    if (content.startsWith(`${prefix}viewavatar`)) {
         try {
             const args = message.content.slice(prefix.length).trim().split(/ +/);
             const command = args.shift();
@@ -127,7 +131,7 @@ client.on('messageCreate', async function (message){
     }
 
     // foxo userinfo
-    if (message.content.startsWith(`${prefix}userinfo`)) {
+    if (content.startsWith(`${prefix}userinfo`)) {
         const args = message.content.slice(prefix.length).trim().split(/ +/);
         const command = args.shift();
         let input = args[0];
@@ -181,7 +185,7 @@ client.on('messageCreate', async function (message){
     }
 
     // foxo saveinfo
-    if (message.content.startsWith(`${prefix}saveinfo`)) {
+    if (content.startsWith(`${prefix}saveinfo`)) {
         try {
             const args = message.content.slice(prefix.length).trim().split(/ +/);
             const command = args.shift();
@@ -245,9 +249,50 @@ client.on('messageCreate', async function (message){
 // - - -
 
 
-// Level/XP System
-client.on('messageCreate', function (message){
+// Help / Command List
+client.on('messageCreate', async function (message){
     if (message.author.bot) return;
+
+
+    const content = message.content.toLowerCase();
+
+    const help = "-h ";
+    const commands = {
+        "ping": "Ping the bot!",
+        "joke": "Get a random joke!",
+        "qr": "Generate a QR code.",
+        "cat": "Get a random picture of a cute cat!",
+        "fox": "Get a random picture of a cute fox!",
+
+        "viewavatar": "View a user's profile picture.",
+        "userinfo": "List of user's basic informations"
+    };
+
+    // foxo -h SPECIFIC_COMMAND
+    if (content.startsWith(`${prefix}${help}`)) {
+        const command = content.slice((prefix + help).length).trim();
+
+        if (commands[command]) {
+            const embed = new EmbedBuilder()
+                .setDescription(`\`foxo ${command}\` — ${commands[command]}`)
+                .setColor('#00B0F4');
+            
+            await message.reply({ embeds: [embed] });
+        } else {
+            message.reply("❌ Command not found. Try one of these:\n" +
+                Object.keys(commands).map(cmd => `${prefix}${help}${cmd}`).join("\n")
+            );
+        }
+    }
+
+    if (content === `${prefix}ls`) {
+        const embed = new EmbedBuilder()
+            .setTitle("Command List")
+            .setDescription(`\`foxo ls\` — List of **Milk Foxo**'s available commands.\n\n\`foxo ping\` — Ping pong!\n\`foxo joke\` — Get a random joke.\n\`foxo qr\` — Generate a QR code.\n\`foxo cat\` — Get a random picture of a cute catze.\n\`foxo fox\` — Get a random image of a cute fox.\n\n\`foxo viewavatar\` — View a user's profile picture.\n\`foxo userinfo\` — List of user's basic informations.`)
+            .setColor('#00B0F4');
+
+        await message.reply({ embeds: [embed] });
+    }
 });
 // - - -
 
