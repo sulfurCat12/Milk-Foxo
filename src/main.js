@@ -312,6 +312,8 @@ client.on('messageCreate', async function (message){
 
     const help = "-h ";
     const commands = {
+        "ls": "List of **Milk Foxo**'s available commands.",
+
         "ping": "Ping the bot!",
         "joke": "Get a random joke!",
         "qr": "Generate a QR code.",
