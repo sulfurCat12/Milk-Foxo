@@ -97,7 +97,7 @@ client.on('messageCreate', async function (message){
         }
     }
 
-    // foxo catgirl
+    // foxo catgirl / foxgirl
     if (content === `${prefix}catgirl` || content === `${prefix}foxgirl`) {
         let API;
         if (content === `${prefix}catgirl`) {
