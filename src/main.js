@@ -98,8 +98,13 @@ client.on('messageCreate', async function (message){
     }
 
     // foxo catgirl
-    if (content === `${prefix}catgirl`) {
-        const API = 'https://api.nekosia.cat/api/v1/images/catgirl'
+    if (content === `${prefix}catgirl` || content === `${prefix}foxgirl`) {
+        let API;
+        if (content === `${prefix}catgirl`) {
+            API = 'https://api.nekosia.cat/api/v1/images/catgirl'
+        } else if (content === `${prefix}foxgirl`) {
+            API = 'https://api.nekosia.cat/api/v1/images/foxgirl'
+        }
 
         try {
             const response = await fetch(API, { signal: AbortSignal.timeout(10000) });
