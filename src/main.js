@@ -1,5 +1,5 @@
 require('dotenv').config();
-const { Client, IntentsBitField, AttachmentBuilder } = require('discord.js');
+const { Client, IntentsBitField, AttachmentBuilder, MessageFlags } = require('discord.js');
 
 const fs = require('fs');
 const path = require('path');
@@ -94,6 +94,59 @@ client.on('messageCreate', async function (message){
             await message.reply({ files: [attachment] });
         } catch (err){
             message.reply(">    \`Failed to fetch Fox\`\n>    \`[" + err + "]\`")
+        }
+    }
+
+    // foxo catgirl
+    if (content === `${prefix}catgirl`) {
+        const API = 'https://api.nekosia.cat/api/v1/images/catgirl'
+
+        try {
+            const response = await fetch(API, { signal: AbortSignal.timeout(10000) });
+            const data = await response.json();
+            
+            const imageURL = data.image.original.url;
+            const imageSrc = data.source.url;
+            const artist = data.attribution.artist.username;
+            const artistProfile = data.attribution.artist.profile;
+
+            const artistText = artist && artistProfile
+                ? `Artist: [${artist}](${artistProfile})`
+                : "Artist: Unknown";
+
+
+            const attachment = new AttachmentBuilder(imageURL, { name: 'image.png'});
+            await message.reply({
+                content: `Link: ${imageSrc}\nArtist: ${artistText}`,
+                files: [attachment],
+                flags: MessageFlags.SuppressEmbeds
+            });
+            return;
+        } catch (err){
+            try {
+                const response = await fetch(API, { signal: AbortSignal.timeout(10000) });
+                const data = await response.json();
+                
+                const imageURL = data.image.original.url;
+                const imageSrc = data.source.url;
+                const artist = data.attribution.artist.username;
+                const artistProfile = data.attribution.artist.profile;
+            
+                const artistText = artist && artistProfile
+                    ? `Artist: [${artist}](${artistProfile})`
+                    : "Artist: Unknown";
+
+                const attachment = new AttachmentBuilder(imageURL, { name: 'image.png'});
+                await message.reply({
+                    content: `Link: ${imageSrc}\nArtist: ${artistText}`,
+                    files: [attachment],
+                    flags: MessageFlags.SuppressEmbeds
+                });
+                return;
+            } catch (err0){
+                message.reply(">  \`Failed to fetch\`\n>  \`[" + err0 + "]\`")
+                return;
+            }
         }
     }
 
@@ -298,18 +351,10 @@ client.on('messageCreate', async function (message){
 
         await message.reply({ embeds: [embed] });
     }
-});
-// - - -
 
 
 
-// Help / Command List
-client.on('messageCreate', async function (message){
-    if (message.author.bot) return;
-
-
-    const content = message.content.toLowerCase();
-
+    // Help / Command List
     const help = "-h ";
     const commands = {
         "ls": "List of **Milk Foxo**'s available commands.",
@@ -353,7 +398,5 @@ client.on('messageCreate', async function (message){
     }
 });
 // - - -
-
-
 
 client.login(process.env.TOKEN);
