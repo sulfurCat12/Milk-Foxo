@@ -149,9 +149,24 @@ client.on('messageCreate', async function (message){
                 });
                 return;
             } catch (err0){
-                message.reply(">  \`Failed to fetch\`\n>  \`[" + err0 + "]\`")
+                message.reply(">  \`ACTION FAILED\`\n>  \`[" + err0 + "]\`")
                 return;
             }
+        }
+    }
+
+    // foxo fact
+    if (content === `${prefix}fact`) {
+        const API = 'https://uselessfacts.jsph.pl/api/v2/facts/random?language=en';
+
+        try {
+            const response = await fetch(API);
+            const data = await response.json();
+            const fact = data.text;
+
+            await message.reply(`>    ${fact}`);
+        } catch (err) {
+            message.reply(">  \`ACTION FAILED\`\n>  \`[" + err + "]\`");
         }
     }
 
