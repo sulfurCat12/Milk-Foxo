@@ -384,6 +384,9 @@ client.on('messageCreate', async function (message){
         "qr": "Generate a QR code.",
         "cat": "Get a random picture of a cute cat!",
         "fox": "Get a random picture of a cute fox!",
+        "fact": "Get a random useless fact.",
+        "catgirl": "Get a random picture of a catgirl!",
+        "foxgirl": "Get a random picture of a foxgirl!",
 
         "viewavatar": "View a user's profile picture.",
         "viewicon": "View the server's icon.",
@@ -411,7 +414,7 @@ client.on('messageCreate', async function (message){
     if (content === `${prefix}ls`) {
         const embed = new EmbedBuilder()
             .setTitle("Command List")
-            .setDescription(`\`foxo ls\` — List of **Milk Foxo**'s available commands.\n\n\`foxo ping\` — Ping pong!\n\`foxo joke\` — Get a random joke.\n\`foxo qr\` — Generate a QR code.\n\`foxo cat\` — Get a random picture of a cute katze.\n\`foxo fox\` — Get a random image of a cute fox.\n\n\`foxo viewavatar\` — View a user's profile picture.\n\`foxo viewicon\` — View the server's icon.\n\`foxo userinfo\` — List of user's basic informations.\n\`foxo serverinfo\` — List of server informations—members, channels, etc.`)
+            .setDescription(`\`foxo ls\` — List of **Milk Foxo**'s available commands.\n\n\`foxo ping\` — Ping pong!\n\`foxo joke\` — Get a random joke.\n\`foxo qr\` — Generate a QR code.\n\`foxo cat\` — Get a random picture of a cute katze.\n\`foxo fox\` — Get a random image of a cute fox.\n\`foxo fact\` — Get a random useless fact.\n\`foxo catgirl\` — Get a random picture of a catgirl\n\`foxo foxgirl\` — Get a random picture of a foxgirl\n\n\`foxo viewavatar\` — View a user's profile picture.\n\`foxo viewicon\` — View the server's icon.\n\`foxo userinfo\` — List of user's basic informations.\n\`foxo serverinfo\` — List of server informations—members, channels, etc.`)
             .setColor('#00B0F4');
 
         await message.reply({ embeds: [embed] });
