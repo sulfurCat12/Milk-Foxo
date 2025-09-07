@@ -18,7 +18,17 @@ client.on('ready', function (c){
     console.log(`✅ ${c.user.tag} is online.`)
 });
 
+async function fetchWithTimeout(url, timeout = 10000) {
+    const controller = new AbortController();
+    const id = setTimeout(() => controller.abort(), timeout);
 
+    try {
+        const response = await fetch(url, { signal: controller.signal });
+        return response;
+    } finally {
+        clearTimeout(id); // cleanup so it doesn’t leak timers
+    }
+}
 
 // Commands
 const prefix = "foxo ";
@@ -44,16 +54,47 @@ client.on('messageCreate', async function (message){
 
     // foxo joke
     if (content === `${prefix}joke`) {
-        const response = await fetch('https://icanhazdadjoke.com/', {
-            headers: { 'Accept': 'application/json' }
-        });
-        const data = await response.json();
-        await message.reply(data.joke);
+        const API = ['https://v2.jokeapi.dev/joke/Dark?type=twopart&blacklistFlags=nsfw,explicit',
+                     'https://v2.jokeapi.dev/joke/Dark?type=single&blacklistFlags=nsfw,explicit',
+                     'https://v2.jokeapi.dev/joke/Programming?type=twopart&blacklistFlags=nsfw,explicit',
+                     'https://v2.jokeapi.dev/joke/Programming?type=single&blacklistFlags=nsfw,explicit',
+                     'https://v2.jokeapi.dev/joke/Misc?type=twopart&blacklistFlags=nsfw,explicit',
+                     'https://v2.jokeapi.dev/joke/Misc?type=single&blacklistFlags=nsfw,explicit'
+        ];
+
+        try {
+            const randomIndex = Math.floor(Math.random() * API.length);
+            const randomAPI = API[randomIndex];
+            
+            const response = await fetchWithTimeout(randomAPI, 10000);
+            const data = await response.json();
+
+            if (data.type === 'twopart') {
+                await message.reply(`>  ${data.setup}\n\n>  ${data.delivery}`);
+            } else if (data.type === 'single') {
+                await message.reply(`>  ${data.joke}`)
+            }
+        } catch (err) {
+            try {
+                const randomIndex = Math.floor(Math.random() * API.length);
+                const randomAPI = API[randomIndex];
+                
+                const response = await fetch(randomAPI, { signal: AbortSignal.timeout(10000) });
+                const data = await response.json();
+
+                if (data.type === 'twopart') {
+                    await message.reply(`>  ${data.setup}\n\n>  ${data.delivery}`);
+                } else if (data.type === 'single') {
+                    await message.reply(`>  ${data.joke}`)
+                }
+            } catch (err0) {
+                message.reply(">  \`ACTION FAILED\`\n>  \`[" + err0 + "]\`");
+            }
+        }
     }
 
     // foxo qr ---
-    if (content.startsWith(`${prefix}qr `)) {  
-        const qrcode = message.content;  
+    if (content.startsWith(`${prefix}qr `)) {
         const qrtext = message.content.slice((`${prefix}qr `).length).trim(); 
         const qrImage = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(qrtext)}`;
       
@@ -107,7 +148,7 @@ client.on('messageCreate', async function (message){
         }
 
         try {
-            const response = await fetch(API, { signal: AbortSignal.timeout(10000) });
+            const response = await fetchWithTimeout(API, 10000);
             const data = await response.json();
             
             const imageURL = data.image.original.url;
@@ -129,7 +170,7 @@ client.on('messageCreate', async function (message){
             return;
         } catch (err){
             try {
-                const response = await fetch(API, { signal: AbortSignal.timeout(10000) });
+                const response = await fetchWithTimeout(API, 10000);
                 const data = await response.json();
                 
                 const imageURL = data.image.original.url;
@@ -143,7 +184,7 @@ client.on('messageCreate', async function (message){
 
                 const attachment = new AttachmentBuilder(imageURL, { name: 'image.png'});
                 await message.reply({
-                    content: `Link: ${imageSrc}\nArtist: ${artistText}`,
+                    content: `Link: ${imageSrc}\n${artistText}`,
                     files: [attachment],
                     flags: MessageFlags.SuppressEmbeds
                 });
@@ -394,7 +435,7 @@ client.on('messageCreate', async function (message){
         "serverinfo": "List of server informations—members, channels, etc."
     };
 
-    // foxo -h SPECIFIC_COMMAND
+    // foxo -h COMMAND
     if (content.startsWith(`${prefix}${help}`)) {
         const command = content.slice((prefix + help).length).trim();
 
