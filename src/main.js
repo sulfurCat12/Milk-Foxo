@@ -54,12 +54,13 @@ client.on('messageCreate', async function (message){
 
     // foxo joke
     if (content === `${prefix}joke`) {
-        const API = ['https://v2.jokeapi.dev/joke/Dark?type=twopart&blacklistFlags=nsfw,explicit',
-                     'https://v2.jokeapi.dev/joke/Dark?type=single&blacklistFlags=nsfw,explicit',
-                     'https://v2.jokeapi.dev/joke/Programming?type=twopart&blacklistFlags=nsfw,explicit',
-                     'https://v2.jokeapi.dev/joke/Programming?type=single&blacklistFlags=nsfw,explicit',
-                     'https://v2.jokeapi.dev/joke/Misc?type=twopart&blacklistFlags=nsfw,explicit',
-                     'https://v2.jokeapi.dev/joke/Misc?type=single&blacklistFlags=nsfw,explicit'
+        const API = [
+            'https://v2.jokeapi.dev/joke/Dark?type=twopart&blacklistFlags=nsfw,explicit',
+            'https://v2.jokeapi.dev/joke/Dark?type=single&blacklistFlags=nsfw,explicit',
+            'https://v2.jokeapi.dev/joke/Programming?type=twopart&blacklistFlags=nsfw,explicit',
+            'https://v2.jokeapi.dev/joke/Programming?type=single&blacklistFlags=nsfw,explicit',
+            'https://v2.jokeapi.dev/joke/Misc?type=twopart&blacklistFlags=nsfw,explicit',
+            'https://v2.jokeapi.dev/joke/Misc?type=single&blacklistFlags=nsfw,explicit'
         ];
 
         try {
