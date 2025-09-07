@@ -163,7 +163,7 @@ client.on('messageCreate', async function (message){
 
             const attachment = new AttachmentBuilder(imageURL, { name: 'image.png'});
             await message.reply({
-                content: `Link: ${imageSrc}\nArtist: ${artistText}`,
+                content: `Link: ${imageSrc}\n${artistText}`,
                 files: [attachment],
                 flags: MessageFlags.SuppressEmbeds
             });
