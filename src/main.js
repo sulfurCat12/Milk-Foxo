@@ -212,6 +212,92 @@ client.on('messageCreate', async function (message){
         }
     }
 
+    // foxo kanji
+    if (content.startsWith(`${prefix}kanji`)) {
+        const kanji = content.slice(11);
+        let API = 'https://kanjiapi.dev/v1/kanji/' + kanji;
+        
+        try {
+            const response = await fetchWithTimeout(API, 10000);
+            const data = await response.json();
+
+            let meaningList = "";
+            let kunReadings = "";
+            let onReadings = "";
+
+            data.meanings.forEach(function(entry) {
+                meaningList += `${entry}, `;
+            });
+            meaningList = meaningList.slice(0, -2);
+
+            data.kun_readings.forEach(function(entry) {
+                kunReadings += `${entry}, `;
+            });
+            kunReadings = kunReadings.slice(0, -2);
+
+            data.on_readings.forEach(function(entry) {
+                onReadings += `${entry}, `;
+            });
+            onReadings = onReadings.slice(0, -2);
+
+            const embed = new EmbedBuilder()
+                .setTitle(`Kanji — ${data.kanji}`)
+                .setDescription(`
+                    JLPT: \`${data.jlpt ?? 'No info'}\`
+                    Grade: \`${data.grade ?? 'No info'}\`\n
+
+                    Meanings: \`${meaningList}\`
+                    Kunyomi: \`${kunReadings || 'None'}\`
+                    Onyomi: \`${onReadings || 'None'}\`
+                    Strokes: \`${data.stroke_count ?? 'No info'}\`
+                `)
+                .setColor('#00B0F4');
+
+            await message.reply({ embeds: [embed] });
+        } catch (err) {
+            try {
+                const response = await fetchWithTimeout(API, 10000);
+                const data = await response.json();
+
+                let meaningList = "";
+                let kunReadings = "";
+                let onReadings = "";
+
+                data.meanings.forEach(function(entry) {
+                    meaningList += `${entry}, `;
+                });
+                meaningList = meaningList.slice(0, -2);
+
+                data.kun_readings.forEach(function(entry) {
+                    kunReadings += `${entry}, `;
+                });
+                kunReadings = kunReadings.slice(0, -2);
+
+                data.on_readings.forEach(function(entry) {
+                    onReadings += `${entry}, `;
+                });
+                onReadings = onReadings.slice(0, -2);
+
+                const embed = new EmbedBuilder()
+                    .setTitle(`Kanji — ${data.kanji}`)
+                    .setDescription(`
+                        JLPT: \`${data.jlpt ?? 'No info'}\`
+                        Grade: \`${data.grade ?? 'No info'}\`
+
+                        Meanings: \`${meaningList}\`
+                        Kunyomi: \`${kunReadings || 'None'}\`
+                        Onyomi: \`${onReadings || 'None'}\`
+                        Strokes: \`${data.stroke_count ?? 'No info'}\`
+                    `)
+                    .setColor('#00B0F4');
+
+                await message.reply({ embeds: [embed] });
+                } catch (err0) {
+                    message.reply(">  \`ACTION FAILED\`\n>  \`[" + err + "]\`");
+                }
+        }
+    } 
+
 
 
     // Utilities - -
