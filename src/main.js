@@ -1,5 +1,5 @@
 require('dotenv').config();
-const { Client, IntentsBitField, AttachmentBuilder } = require('discord.js');
+const { Client, IntentsBitField, AttachmentBuilder, MessageFlags } = require('discord.js');
 
 const fs = require('fs');
 const path = require('path');
@@ -18,7 +18,17 @@ client.on('ready', function (c){
     console.log(`✅ ${c.user.tag} is online.`)
 });
 
+async function fetchWithTimeout(url, timeout = 10000) {
+    const controller = new AbortController();
+    const id = setTimeout(() => controller.abort(), timeout);
 
+    try {
+        const response = await fetch(url, { signal: controller.signal });
+        return response;
+    } finally {
+        clearTimeout(id); // cleanup so it doesn’t leak timers
+    }
+}
 
 // Commands
 const prefix = "foxo ";
@@ -44,16 +54,48 @@ client.on('messageCreate', async function (message){
 
     // foxo joke
     if (content === `${prefix}joke`) {
-        const response = await fetch('https://icanhazdadjoke.com/', {
-            headers: { 'Accept': 'application/json' }
-        });
-        const data = await response.json();
-        await message.reply(data.joke);
+        const API = [
+            'https://v2.jokeapi.dev/joke/Dark?type=twopart&blacklistFlags=nsfw,explicit',
+            'https://v2.jokeapi.dev/joke/Dark?type=single&blacklistFlags=nsfw,explicit',
+            'https://v2.jokeapi.dev/joke/Programming?type=twopart&blacklistFlags=nsfw,explicit',
+            'https://v2.jokeapi.dev/joke/Programming?type=single&blacklistFlags=nsfw,explicit',
+            'https://v2.jokeapi.dev/joke/Misc?type=twopart&blacklistFlags=nsfw,explicit',
+            'https://v2.jokeapi.dev/joke/Misc?type=single&blacklistFlags=nsfw,explicit'
+        ];
+
+        try {
+            const randomIndex = Math.floor(Math.random() * API.length);
+            const randomAPI = API[randomIndex];
+            
+            const response = await fetchWithTimeout(randomAPI, 10000);
+            const data = await response.json();
+
+            if (data.type === 'twopart') {
+                await message.reply(`>  ${data.setup}\n\n>  ${data.delivery}`);
+            } else if (data.type === 'single') {
+                await message.reply(`>  ${data.joke}`)
+            }
+        } catch (err) {
+            try {
+                const randomIndex = Math.floor(Math.random() * API.length);
+                const randomAPI = API[randomIndex];
+                
+                const response = await fetch(randomAPI, { signal: AbortSignal.timeout(10000) });
+                const data = await response.json();
+
+                if (data.type === 'twopart') {
+                    await message.reply(`>  ${data.setup}\n\n>  ${data.delivery}`);
+                } else if (data.type === 'single') {
+                    await message.reply(`>  ${data.joke}`)
+                }
+            } catch (err0) {
+                message.reply(">  \`ACTION FAILED\`\n>  \`[" + err0 + "]\`");
+            }
+        }
     }
 
     // foxo qr ---
-    if (content.startsWith(`${prefix}qr `)) {  
-        const qrcode = message.content;  
+    if (content.startsWith(`${prefix}qr `)) {
         const qrtext = message.content.slice((`${prefix}qr `).length).trim(); 
         const qrImage = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(qrtext)}`;
       
@@ -94,6 +136,165 @@ client.on('messageCreate', async function (message){
             await message.reply({ files: [attachment] });
         } catch (err){
             message.reply(">    \`Failed to fetch Fox\`\n>    \`[" + err + "]\`")
+        }
+    }
+
+    // foxo catgirl / foxgirl
+    if (content === `${prefix}catgirl` || content === `${prefix}foxgirl`) {
+        let API;
+        if (content === `${prefix}catgirl`) {
+            API = 'https://api.nekosia.cat/api/v1/images/catgirl'
+        } else if (content === `${prefix}foxgirl`) {
+            API = 'https://api.nekosia.cat/api/v1/images/foxgirl'
+        }
+
+        try {
+            const response = await fetchWithTimeout(API, 10000);
+            const data = await response.json();
+            
+            const imageURL = data.image.original.url;
+            const imageSrc = data.source.url;
+            const artist = data.attribution.artist.username;
+            const artistProfile = data.attribution.artist.profile;
+
+            const artistText = artist && artistProfile
+                ? `Artist: [${artist}](${artistProfile})`
+                : "Artist: Unknown";
+
+
+            const attachment = new AttachmentBuilder(imageURL, { name: 'image.png'});
+            await message.reply({
+                content: `Link: ${imageSrc}\n${artistText}`,
+                files: [attachment],
+                flags: MessageFlags.SuppressEmbeds
+            });
+            return;
+        } catch (err){
+            try {
+                const response = await fetchWithTimeout(API, 10000);
+                const data = await response.json();
+                
+                const imageURL = data.image.original.url;
+                const imageSrc = data.source.url;
+                const artist = data.attribution.artist.username;
+                const artistProfile = data.attribution.artist.profile;
+            
+                const artistText = artist && artistProfile
+                    ? `Artist: [${artist}](${artistProfile})`
+                    : "Artist: Unknown";
+
+                const attachment = new AttachmentBuilder(imageURL, { name: 'image.png'});
+                await message.reply({
+                    content: `Link: ${imageSrc}\n${artistText}`,
+                    files: [attachment],
+                    flags: MessageFlags.SuppressEmbeds
+                });
+                return;
+            } catch (err0){
+                message.reply(">  \`ACTION FAILED\`\n>  \`[" + err0 + "]\`")
+                return;
+            }
+        }
+    }
+
+    // foxo fact
+    if (content === `${prefix}fact`) {
+        const API = 'https://uselessfacts.jsph.pl/api/v2/facts/random?language=en';
+
+        try {
+            const response = await fetch(API);
+            const data = await response.json();
+            const fact = data.text;
+
+            await message.reply(`>    ${fact}`);
+        } catch (err) {
+            message.reply(">  \`ACTION FAILED\`\n>  \`[" + err + "]\`");
+        }
+    }
+
+    // foxo kanji
+    if (content.startsWith(`${prefix}kanji`)) {
+        const kanji = content.slice(11);
+        let API = 'https://kanjiapi.dev/v1/kanji/' + kanji;
+        
+        try {
+            const response = await fetchWithTimeout(API, 10000);
+            const data = await response.json();
+
+            let meaningList = "";
+            let kunReadings = "";
+            let onReadings = "";
+
+            data.meanings.forEach(function(entry) {
+                meaningList += `${entry}, `;
+            });
+            meaningList = meaningList.slice(0, -2);
+
+            data.kun_readings.forEach(function(entry) {
+                kunReadings += `${entry}, `;
+            });
+            kunReadings = kunReadings.slice(0, -2);
+
+            data.on_readings.forEach(function(entry) {
+                onReadings += `${entry}, `;
+            });
+            onReadings = onReadings.slice(0, -2);
+
+            const embed = new EmbedBuilder()
+                .setTitle(`Kanji — ${data.kanji}`)
+                .setDescription(`
+                    JLPT: \`${data.jlpt ?? 'No info'}\`
+                    Grade: \`${data.grade ?? 'No info'}\`\n
+
+                    Meanings: \`${meaningList}\`
+                    Kunyomi: \`${kunReadings || 'None'}\`
+                    Onyomi: \`${onReadings || 'None'}\`
+                    Strokes: \`${data.stroke_count ?? 'No info'}\`
+                `)
+                .setColor('#00B0F4');
+
+            await message.reply({ embeds: [embed] });
+        } catch (err) {
+            try {
+                const response = await fetchWithTimeout(API, 10000);
+                const data = await response.json();
+
+                let meaningList = "";
+                let kunReadings = "";
+                let onReadings = "";
+
+                data.meanings.forEach(function(entry) {
+                    meaningList += `${entry}, `;
+                });
+                meaningList = meaningList.slice(0, -2);
+
+                data.kun_readings.forEach(function(entry) {
+                    kunReadings += `${entry}, `;
+                });
+                kunReadings = kunReadings.slice(0, -2);
+
+                data.on_readings.forEach(function(entry) {
+                    onReadings += `${entry}, `;
+                });
+                onReadings = onReadings.slice(0, -2);
+
+                const embed = new EmbedBuilder()
+                    .setTitle(`Kanji — ${data.kanji}`)
+                    .setDescription(`
+                        JLPT: \`${data.jlpt ?? 'No info'}\`
+                        Grade: \`${data.grade ?? 'No info'}\`
+
+                        Meanings: \`${meaningList}\`
+                        Kunyomi: \`${kunReadings || 'None'}\`
+                        Onyomi: \`${onReadings || 'None'}\`
+                        Strokes: \`${data.stroke_count ?? 'No info'}\`
+                    `)
+                    .setColor('#00B0F4');
+
+                await message.reply({ embeds: [embed] });
+                } catch (err0) {
+                    message.reply(">  \`ACTION FAILED\`\n>  \`[" + err + "]\`");
+                }
         }
     }
 
@@ -301,18 +502,7 @@ client.on('messageCreate', async function (message){
 
 
 
-});
-// - - -
-
-
-
-// Help / Command List
-client.on('messageCreate', async function (message){
-    if (message.author.bot) return;
-
-
-    const content = message.content.toLowerCase();
-
+    // Help / Command List
     const help = "-h ";
     const commands = {
         "ls": "List of **Milk Foxo**'s available commands.",
@@ -322,6 +512,10 @@ client.on('messageCreate', async function (message){
         "qr": "Generate a QR code.",
         "cat": "Get a random picture of a cute cat!",
         "fox": "Get a random picture of a cute fox!",
+        "fact": "Get a random useless fact.",
+        "catgirl": "Get a random picture of a catgirl!",
+        "foxgirl": "Get a random picture of a foxgirl!",
+        "kanji": "Get informations about the Kanji.",
 
         "viewavatar": "View a user's profile picture.",
         "viewicon": "View the server's icon.",
@@ -329,7 +523,7 @@ client.on('messageCreate', async function (message){
         "serverinfo": "List of server informations—members, channels, etc."
     };
 
-    // foxo -h SPECIFIC_COMMAND
+    // foxo -h COMMAND
     if (content.startsWith(`${prefix}${help}`)) {
         const command = content.slice((prefix + help).length).trim();
 
@@ -339,24 +533,18 @@ client.on('messageCreate', async function (message){
                 .setColor('#00B0F4');
             
             await message.reply({ embeds: [embed] });
-        } else {
-            message.reply("❌ Command not found. Try one of these:\n" +
-                Object.keys(commands).map(cmd => `${prefix}${help}${cmd}`).join("\n")
-            );
         }
     }
 
     if (content === `${prefix}ls`) {
         const embed = new EmbedBuilder()
             .setTitle("Command List")
-            .setDescription(`\`foxo ls\` — List of **Milk Foxo**'s available commands.\n\n\`foxo ping\` — Ping pong!\n\`foxo joke\` — Get a random joke.\n\`foxo qr\` — Generate a QR code.\n\`foxo cat\` — Get a random picture of a cute katze.\n\`foxo fox\` — Get a random image of a cute fox.\n\n\`foxo viewavatar\` — View a user's profile picture.\n\`foxo viewicon\` — View the server's icon.\n\`foxo userinfo\` — List of user's basic informations.\n\`foxo serverinfo\` — List of server informations—members, channels, etc.`)
+            .setDescription(`\`foxo ls\` — List of **Milk Foxo**'s available commands.\n\n\`foxo ping\` — Ping pong!\n\`foxo joke\` — Get a random joke.\n\`foxo qr\` — Generate a QR code.\n\`foxo cat\` — Get a random picture of a cute katze.\n\`foxo fox\` — Get a random image of a cute fox.\n\`foxo fact\` — Get a random useless fact.\n\`foxo catgirl\` — Get a random picture of a catgirl\n\`foxo foxgirl\` — Get a random picture of a foxgirl\n\`foxo kanji\` — Get information about the Kanji.\n\n\`foxo viewavatar\` — View a user's profile picture.\n\`foxo viewicon\` — View the server's icon.\n\`foxo userinfo\` — List of user's basic informations.\n\`foxo serverinfo\` — List of server informations—members, channels, etc.`)
             .setColor('#00B0F4');
 
         await message.reply({ embeds: [embed] });
     }
 });
 // - - -
-
-
 
 client.login(process.env.TOKEN);
