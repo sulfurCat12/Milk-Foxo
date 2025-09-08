@@ -298,6 +298,9 @@ client.on('messageCreate', async function (message){
 
         await message.reply({ embeds: [embed] });
     }
+
+
+
 });
 // - - -
 
