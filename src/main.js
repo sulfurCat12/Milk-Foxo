@@ -296,7 +296,7 @@ client.on('messageCreate', async function (message){
                     message.reply(">  \`ACTION FAILED\`\n>  \`[" + err + "]\`");
                 }
         }
-    } 
+    }
 
 
 
@@ -533,10 +533,6 @@ client.on('messageCreate', async function (message){
                 .setColor('#00B0F4');
             
             await message.reply({ embeds: [embed] });
-        } else {
-            message.reply("❌ Command not found. Try one of these:\n" +
-                Object.keys(commands).map(cmd => `${prefix}${help}${cmd}`).join("\n")
-            );
         }
     }
 
