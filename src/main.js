@@ -547,4 +547,44 @@ client.on('messageCreate', async function (message){
 });
 // - - -
 
+
+
+// Level / XP System
+client.on('messageCreate', async function(message){
+    if (message.author.bot) return;
+
+    const filePath = path.join(__dirname, '../userLvl.json');
+
+    let data = {};
+    if (fs.existsSync(filePath)) {
+        const raw = fs.readFileSync(filePath, 'utf8');
+        data = JSON.parse(raw);
+    }
+
+
+    if (!data[message.author.id]) {
+        data[message.author.id] = {
+            userName: message.author.tag,
+            userID: message.author.id,
+            XP: 0,     // starting XP
+            Level: 0  // starting level
+        };
+
+        fs.writeFileSync(filePath, JSON.stringify(data, null, 2), 'utf8');
+        console.log(`New user added: ${message.author.tag}`);
+    };
+
+
+
+    // XP / Level
+    const msgLength = message.content.length;
+    if (msgLength < 10){
+        xpGain = Math.random(1, 3)
+    } else if (msgLength < 24) {
+        xpGain = Math.random(3, 7)
+    }
+});
+
+
+
 client.login(process.env.TOKEN);
