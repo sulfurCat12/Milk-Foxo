@@ -26,7 +26,7 @@ async function fetchWithTimeout(url, timeout = 10000) {
         const response = await fetch(url, { signal: controller.signal });
         return response;
     } finally {
-        clearTimeout(id); // cleanup so it doesn’t leak timers
+        clearTimeout(id);
     }
 }
 
