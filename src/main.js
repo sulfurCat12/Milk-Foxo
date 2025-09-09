@@ -18,6 +18,9 @@ client.on('ready', function (c){
     console.log(`✅ ${c.user.tag} is online.`)
 });
 
+
+
+
 async function fetchWithTimeout(url, timeout = 10000) {
     const controller = new AbortController();
     const id = setTimeout(() => controller.abort(), timeout);
