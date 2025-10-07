@@ -4,6 +4,7 @@ const { Client, IntentsBitField, AttachmentBuilder, MessageFlags } = require('di
 const fs = require('fs');
 const path = require('path');
 const { EmbedBuilder } = require('discord.js');
+const { time } = require('console');
 
 const client = new Client({
     intents: [
@@ -14,8 +15,44 @@ const client = new Client({
     ]
 });
 
+
+
+let startTime;
+let intervalId;
+
+const startTimer = () => {
+    startTime = Date.now(); // Save the start time
+    clearInterval(intervalId); // Clear any existing interval
+    intervalId = setInterval(() => {
+        updateTimer();
+    }, 1000); // Update every second if needed
+};
+
+const updateTimer = () => {
+    const elapsedTime = Math.floor((Date.now() - startTime) / 1000); // in seconds
+
+    const days = Math.floor(elapsedTime / 86400);
+    const hours = Math.floor((elapsedTime % 86400) / 3600);
+    const minutes = Math.floor((elapsedTime % 3600) / 60);
+    const seconds = elapsedTime % 60;
+
+    const dayText = days > 0 ? `${days}d ` : "";
+    return `${dayText}${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+};
+
+
+
 client.on('ready', function (c){
     console.log(`✅ ${c.user.tag} is online.`)
+    startTimer();
+
+    setInterval(() => {
+        const currentRuntime = updateTimer();
+        client.user.setPresence({
+            activities: [{ name: `Runtime: ${currentRuntime}`, type: 0 }],
+            status: 'online'
+        });
+    }, 1000); // updates every 1s
 });
 
 
@@ -44,6 +81,12 @@ client.on('messageCreate', async function (message){
     // foxo greet
     if (content === `${prefix}greet`) {
         await message.reply(`Hello there, ${message.author.tag}!`);
+    }
+
+    // foxo runtime
+    if (content === `${prefix}runtime`) {
+        const currentRuntime = updateTimer();
+        message.reply(`> __Runtime__: \`${currentRuntime}\``);
     }
 
     // foxo ping
