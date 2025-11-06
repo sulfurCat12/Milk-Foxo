@@ -98,7 +98,7 @@ client.on('messageCreate', async function (message){
 
         const embed1 = new EmbedBuilder()
             .setTitle("🏓 Pong!")
-            .setDescription(`• Bot latency: \`${roundTrip}\`\n• API latency: \`${apiPing}\``)
+            .setDescription(`• Bot latency: \`${roundTrip}ms\`\n• API latency: \`${apiPing}ms\``)
             .setColor("#00AFF4");
 
         await msg.edit({ embeds: [embed1] });
