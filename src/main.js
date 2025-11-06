@@ -4,7 +4,6 @@ const { Client, IntentsBitField, AttachmentBuilder, MessageFlags, Embed } = requ
 const fs = require('fs');
 const path = require('path');
 const { EmbedBuilder } = require('discord.js');
-const { time } = require('console');
 
 const client = new Client({
     intents: [
@@ -145,7 +144,7 @@ client.on('messageCreate', async function (message){
                 joke()
             } catch (err0) {
                 const embed = new EmbedBuilder()
-                    .setTitle("⛔・ERR0R")
+                    .setTitle("[⛔] — ERR0R:")
                     .setDescription(`Action failed:\n\`[ ${err0} ]\``)
                     .setColor("#E24B4B");
 
@@ -156,15 +155,24 @@ client.on('messageCreate', async function (message){
 
     // foxo qr ---
     if (content.startsWith(`${prefix}qr `)) {
-        const qrtext = message.content.slice((`${prefix}qr `).length).trim(); 
-        const qrImage = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(qrtext)}`;
-      
-        const embed = new EmbedBuilder()
-            .setDescription(`QR Code for \`${qrtext}\``)
-            .setImage(qrImage)
-            .setColor("#00AFF4");
+        try {
+            // const qrtext = message.content.slice((`${prefix}qr `).length).trim(); 
+            const qrImage = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(qrtext)}`;
+        
+            const embed = new EmbedBuilder()
+                .setDescription(`QR Code for \`${qrtext}\``)
+                .setImage(qrImage)
+                .setColor("#00AFF4");
 
-        await message.reply({ embeds: [embed] });
+            await message.reply({ embeds: [embed] });
+        } catch (err){
+            const embed = new EmbedBuilder()
+                .setTitle("[⛔] — ERR0R:")
+                .setDescription(`⚠️・Action failed:\n\`[ ${err} ]\`\n\n💡・Usage:\n\`\`\`foxo qr EXAMPLE\`\`\``)
+                .setColor("#E24B4B");
+
+            message.reply({ embeds: [embed] });
+        }
     }
 
     // foxo cat
@@ -183,7 +191,7 @@ client.on('messageCreate', async function (message){
             await message.reply({ embeds: [embed] });            
         } catch (err){
             const embed = new EmbedBuilder()
-                .setTitle("⛔・ERR0R")
+                .setTitle("[⛔] — ERR0R:")
                 .setDescription(`Action failed:\n\`[ ${err} ]\``)
                 .setColor("#E24B4B");
 
@@ -207,7 +215,7 @@ client.on('messageCreate', async function (message){
             await message.reply({ embeds: [embed] });
         } catch (err){
             const embed = new EmbedBuilder()
-                .setTitle("⛔・ERR0R")
+                .setTitle("[⛔] — ERR0R:")
                 .setDescription(`Action failed:\n\`[ ${err} ]\``)
                 .setColor("#E24B4B");
 
@@ -253,7 +261,7 @@ client.on('messageCreate', async function (message){
                     catfox()
             } catch (err0){
                 const embed = new EmbedBuilder()
-                    .setTitle("⛔・ERR0R")
+                    .setTitle("[⛔] — ERR0R:")
                     .setDescription(`Action failed:\n\`[ ${err} ]\``)
                     .setColor("#E24B4B");
 
@@ -313,7 +321,7 @@ client.on('messageCreate', async function (message){
                 doKanji();
             } catch (err0) {
                 const embed = new EmbedBuilder()
-                    .setTitle("⛔・ERR0R")
+                    .setTitle("[⛔] — ERR0R:")
                     .setDescription(`Action failed:\n\`[ ${err} ]\``)
                     .setColor("#E24B4B");
 
@@ -349,8 +357,8 @@ client.on('messageCreate', async function (message){
             message.reply({ embeds: [embed] });
         } catch (err) {
             const embed = new EmbedBuilder()
-                .setTitle("⛔・ERR0R")
-                .setDescription(`Action failed:\n\`[ ${err} ]\``)
+                .setTitle("[⛔] — ERR0R:")
+                .setDescription(`⚠️・Action failed:\n\`[ ${err} ]\`\n\n💡・Usage: \`\`\`foxo viewavatar @MENTION/USER_ID\`\`\``)
                 .setColor("#E24B4B");
 
             message.reply({ embeds: [embed] });
@@ -360,7 +368,6 @@ client.on('messageCreate', async function (message){
     // foxo viewicon
     if (content === `${prefix}viewicon`) {
         const icon = message.guild.iconURL({ dynamic: true, size: 2048 });
-        const attachment = new AttachmentBuilder(icon, { name: 'icon.png' });
 
         const embed = new EmbedBuilder()
             .setTitle(message.guild.name)
@@ -414,8 +421,8 @@ client.on('messageCreate', async function (message){
             await message.reply({ embeds: [embed] });
         } catch (err){
             const embed = new EmbedBuilder()
-                .setTitle("⛔・ERR0R")
-                .setDescription(`Action failed:\n\`[ ${err} ]\``)
+                .setTitle("[⛔] — ERR0R:")
+                .setDescription(`⚠️・Action failed:\n\`[ ${err} ]\`\n\n💡・Usage: \`\`\`foxo userinfo @MENTION/USER_ID\`\`\``)
                 .setColor("#E24B4B");
 
             message.reply({ embeds: [embed] });
@@ -472,8 +479,8 @@ client.on('messageCreate', async function (message){
             fs.writeFileSync(filePath, JSON.stringify(data, null, 2), 'utf8');
         } catch (err) {
             const embed = new EmbedBuilder()
-                .setTitle("⛔・ERR0R")
-                .setDescription(`Action failed:\n\`[ ${err} ]\``)
+                .setTitle("[⛔] — ERR0R:")
+                .setDescription(`⚠️・Action failed:\n\`[ ${err} ]\`\n\n💡・Usage: \`\`\`foxo saveinfo @MENTION/USER_ID\`\`\``)
                 .setColor("#E24B4B");
 
             message.reply({ embeds: [embed] });
@@ -516,16 +523,16 @@ client.on('messageCreate', async function (message){
 
         "ping": "Ping the bot!",
         "joke": "Get a random joke!",
-        "qr": "Generate a QR code.\n💡・Usage: \`foxo qr EXAMPLE\`",
+        "qr": "Generate a QR code.\n\n💡・Usage: \`\`\`foxo qr EXAMPLE\`\`\`",
         "cat": "Get a random picture of a cute cat!",
         "fox": "Get a random picture of a cute fox!",
         "catgirl": "Get a random picture of a catgirl!",
         "foxgirl": "Get a random picture of a foxgirl!",
-        "kanji": "Get informations about the Kanji.\n💡・Usage: \`foxo kanji KANJI\`",
+        "kanji": "Get informations about the Kanji.\n\n💡・Usage: \`\`\`foxo kanji KANJI\`\`\`",
 
-        "viewavatar": "View a user's profile picture.\n💡・Usage: \`foxo viewavatar MENTION/USER_ID\`",
+        "viewavatar": "View a user's profile picture.\n\n💡・Usage: \`\`\`foxo viewavatar MENTION/USER_ID\`\`\`",
         "viewicon": "View the server's icon.",
-        "userinfo": "List of user's basic informations.\n💡・Usage: \`foxo userinfo MENTION/USER_ID\`",
+        "userinfo": "List of user's basic informations.\n\n💡・Usage: \`\`\`foxo userinfo MENTION/USER_ID\`\`\`",
         "serverinfo": "List of server informations—members, channels, etc."
     };
 
