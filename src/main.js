@@ -10,6 +10,7 @@ const client = new Client({
         GatewayIntentBits.Guilds,
         GatewayIntentBits.GuildMessages,
         GatewayIntentBits.MessageContent,
+        GatewayIntentBits.GuildMembers
     ],
 });
 
@@ -39,7 +40,7 @@ const updateTimer = () => {
     return `${dayText}${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
 };
 
-client.on('ready', function (c) {
+client.on('clientReady', function (c) {
     console.log(`✅ ${c.user.tag} is online.`)
     startTimer();
 
@@ -137,10 +138,10 @@ client.on('messageCreate', async function (message) {
         }
 
         try {
-            joke()
+            await joke()
         } catch (err) {
             try {
-                joke()
+                await joke()
             } catch (err0) {
                 const embed = new EmbedBuilder()
                     .setTitle("[⛔] — ERR0R:")
@@ -155,7 +156,7 @@ client.on('messageCreate', async function (message) {
     // foxo qr ---
     if (content.startsWith(`${prefix}qr `)) {
         try {
-            // const qrtext = message.content.slice((`${prefix}qr `).length).trim(); 
+            const qrtext = message.content.slice((`${prefix}qr `).length).trim();
             const qrImage = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(qrtext)}`;
 
             const embed = new EmbedBuilder()
@@ -254,10 +255,10 @@ client.on('messageCreate', async function (message) {
         }
 
         try {
-            catfox()
+            await catfox()
         } catch (err) {
             try {
-                catfox()
+                await catfox()
             } catch (err0) {
                 const embed = new EmbedBuilder()
                     .setTitle("[⛔] — ERR0R:")
@@ -314,10 +315,10 @@ client.on('messageCreate', async function (message) {
         }
 
         try {
-            doKanji();
+            await doKanji();
         } catch (err) {
             try {
-                doKanji();
+                await doKanji();
             } catch (err0) {
                 const embed = new EmbedBuilder()
                     .setTitle("[⛔] — ERR0R:")
@@ -498,13 +499,12 @@ client.on('messageCreate', async function (message) {
 
         const roles = await message.guild.roles.fetch();
 
-        const allMembers = await message.guild.members.fetch();
-        const bots = allMembers.filter(m => m.user.bot);
-        const members = allMembers.filter(m => !m.user.bot);
+        const bots = message.guild.members.cache.filter(m => m.user.bot).size;
+        const members = message.guild.memberCount - bots;
 
         const embed = new EmbedBuilder()
             .setTitle(message.guild.name)
-            .setDescription(`**ID**: \`${message.guild.id}\`\n**Owner**: <@${message.guild.ownerId}>\n**Creation Date**: <t:${Math.floor(message.guild.createdTimestamp / 1000)}:F>\n\n**Members**\nTotal:\`${message.guild.memberCount}\`\nMembers: \`${members.size}\`\nBots: \`${bots.size}\`\n\n**Channels**\nTotal: \`${total}\`\nText Channels: \`${textChannels.size}\`\nVoice Chat Channels: \`${voiceChannels.size}\`\nCategories: \`${categories.size}\`\n\n**Roles**: \`${roles.size}\`\n**Emoji**: \`${message.guild.emojis.cache.size}\`\n\n**Verification Level**: \`${message.guild.verificationLevel}\``)
+            .setDescription(`**ID**: \`${message.guild.id}\`\n**Owner**: <@${message.guild.ownerId}>\n**Creation Date**: <t:${Math.floor(message.guild.createdTimestamp / 1000)}:F>\n\n**Members**\nTotal:\`${message.guild.memberCount}\`\nMembers: \`${members}\`\nBots: \`${bots}\`\n\n**Channels**\nTotal: \`${total}\`\nText Channels: \`${textChannels.size}\`\nVoice Chat Channels: \`${voiceChannels.size}\`\nCategories: \`${categories.size}\`\n\n**Roles**: \`${roles.size}\`\n**Emoji**: \`${message.guild.emojis.cache.size}\`\n\n**Verification Level**: \`${message.guild.verificationLevel}\``)
             .setThumbnail(message.guild.iconURL())
             .setColor('#00B0F4');
 
