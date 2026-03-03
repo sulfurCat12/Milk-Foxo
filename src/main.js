@@ -1,5 +1,5 @@
 require('dotenv').config();
-const { Client, IntentsBitField, AttachmentBuilder, MessageFlags, Embed } = require('discord.js');
+const { Client, GatewayIntentBits, AttachmentBuilder, MessageFlags, Embed } = require('discord.js');
 
 const fs = require('fs');
 const path = require('path');
@@ -7,11 +7,10 @@ const { EmbedBuilder } = require('discord.js');
 
 const client = new Client({
     intents: [
-        IntentsBitField.Flags.Guilds,
-        IntentsBitField.Flags.GuildMembers,
-        IntentsBitField.Flags.GuildMessages,
-        IntentsBitField.Flags.MessageContent
-    ]
+        GatewayIntentBits.Guilds,
+        GatewayIntentBits.GuildMessages,
+        GatewayIntentBits.MessageContent,
+    ],
 });
 
 
@@ -40,7 +39,7 @@ const updateTimer = () => {
     return `${dayText}${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
 };
 
-client.on('ready', function (c){
+client.on('ready', function (c) {
     console.log(`✅ ${c.user.tag} is online.`)
     startTimer();
 
@@ -68,7 +67,7 @@ async function fetchWithTimeout(url, timeout = 10000) {
 
 
 // Commands
-client.on('messageCreate', async function (message){
+client.on('messageCreate', async function (message) {
     const prefix = "foxo ";
     if (message.author.bot) return;
 
@@ -78,9 +77,9 @@ client.on('messageCreate', async function (message){
     if (content === `${prefix}uptime`) {
         const currentRuntime = updateTimer();
         const embed = new EmbedBuilder()
-        .setTitle("Uptime")
-        .setDescription(`<@1396403512375640134> has been running for: \`${currentRuntime}\``)
-        .setColor("#00AFF4");
+            .setTitle("Uptime")
+            .setDescription(`<@1396403512375640134> has been running for: \`${currentRuntime}\``)
+            .setColor("#00AFF4");
 
         message.reply({ embeds: [embed] });
     }
@@ -118,7 +117,7 @@ client.on('messageCreate', async function (message){
         const joke = async () => {
             const randomIndex = Math.floor(Math.random() * API.length);
             const randomAPI = API[randomIndex];
-            
+
             const response = await fetchWithTimeout(randomAPI, 10000);
             const data = await response.json();
 
@@ -158,14 +157,14 @@ client.on('messageCreate', async function (message){
         try {
             // const qrtext = message.content.slice((`${prefix}qr `).length).trim(); 
             const qrImage = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(qrtext)}`;
-        
+
             const embed = new EmbedBuilder()
                 .setDescription(`QR Code for \`${qrtext}\``)
                 .setImage(qrImage)
                 .setColor("#00AFF4");
 
             await message.reply({ embeds: [embed] });
-        } catch (err){
+        } catch (err) {
             const embed = new EmbedBuilder()
                 .setTitle("[⛔] — ERR0R:")
                 .setDescription(`⚠️・Action failed:\n\`[ ${err} ]\`\n\n💡・Usage:\n\`\`\`foxo qr EXAMPLE\`\`\``)
@@ -188,8 +187,8 @@ client.on('messageCreate', async function (message){
                 .setImage(catImage)
                 .setColor("#00AFF4");
 
-            await message.reply({ embeds: [embed] });            
-        } catch (err){
+            await message.reply({ embeds: [embed] });
+        } catch (err) {
             const embed = new EmbedBuilder()
                 .setTitle("[⛔] — ERR0R:")
                 .setDescription(`Action failed:\n\`[ ${err} ]\``)
@@ -213,7 +212,7 @@ client.on('messageCreate', async function (message){
                 .setColor("#00AFF4");
 
             await message.reply({ embeds: [embed] });
-        } catch (err){
+        } catch (err) {
             const embed = new EmbedBuilder()
                 .setTitle("[⛔] — ERR0R:")
                 .setDescription(`Action failed:\n\`[ ${err} ]\``)
@@ -235,7 +234,7 @@ client.on('messageCreate', async function (message){
         const catfox = async () => {
             const response = await fetchWithTimeout(API, 10000);
             const data = await response.json();
-            
+
             const imageURL = data.image.original.url;
             const imageSrc = data.source.url;
             const artist = data.attribution.artist.username;
@@ -256,10 +255,10 @@ client.on('messageCreate', async function (message){
 
         try {
             catfox()
-        } catch (err){
+        } catch (err) {
             try {
-                    catfox()
-            } catch (err0){
+                catfox()
+            } catch (err0) {
                 const embed = new EmbedBuilder()
                     .setTitle("[⛔] — ERR0R:")
                     .setDescription(`Action failed:\n\`[ ${err} ]\``)
@@ -274,7 +273,7 @@ client.on('messageCreate', async function (message){
     if (content.startsWith(`${prefix}kanji`)) {
         const kanji = content.slice(11);
         let API = 'https://kanjiapi.dev/v1/kanji/' + kanji;
-        
+
         const doKanji = async () => {
             const response = await fetchWithTimeout(API, 10000);
             const data = await response.json();
@@ -283,17 +282,17 @@ client.on('messageCreate', async function (message){
             let kunReadings = "";
             let onReadings = "";
 
-            data.meanings.forEach(function(entry) {
+            data.meanings.forEach(function (entry) {
                 meaningList += `${entry}, `;
             });
             meaningList = meaningList.slice(0, -2);
 
-            data.kun_readings.forEach(function(entry) {
+            data.kun_readings.forEach(function (entry) {
                 kunReadings += `${entry}, `;
             });
             kunReadings = kunReadings.slice(0, -2);
 
-            data.on_readings.forEach(function(entry) {
+            data.on_readings.forEach(function (entry) {
                 onReadings += `${entry}, `;
             });
             onReadings = onReadings.slice(0, -2);
@@ -399,7 +398,7 @@ client.on('messageCreate', async function (message){
             const user = await client.users.fetch(inpUser, { force: true });
 
             const badgeNames = user.flags?.toArray() ?? [];
-            const badgeList  = badgeNames.length ? badgeNames.map(flag => FLAG_NAMES[flag] || flag).join(', ') : 'None';
+            const badgeList = badgeNames.length ? badgeNames.map(flag => FLAG_NAMES[flag] || flag).join(', ') : 'None';
 
             const embed = new EmbedBuilder()
                 .setTitle(`Information: ${user.tag} — ${user.id}`)
@@ -419,7 +418,7 @@ client.on('messageCreate', async function (message){
                 .setColor(user.hexAccentColor ?? '#00B0F4');
 
             await message.reply({ embeds: [embed] });
-        } catch (err){
+        } catch (err) {
             const embed = new EmbedBuilder()
                 .setTitle("[⛔] — ERR0R:")
                 .setDescription(`⚠️・Action failed:\n\`[ ${err} ]\`\n\n💡・Usage: \`\`\`foxo userinfo @MENTION/USER_ID\`\`\``)
@@ -451,18 +450,18 @@ client.on('messageCreate', async function (message){
             const user = await client.users.fetch(inpUser, { force: true });
 
             const badgeNames = user.flags?.toArray() ?? [];
-            const badgeList  = badgeNames.length ? badgeNames.map(f => FLAG_NAMES[f] || f).join(', '): 'None';
+            const badgeList = badgeNames.length ? badgeNames.map(f => FLAG_NAMES[f] || f).join(', ') : 'None';
 
             const filePath = path.join(__dirname, '../userData.json');
-            const raw      = fs.readFileSync(filePath, 'utf8');
-            const data     = JSON.parse(raw);
+            const raw = fs.readFileSync(filePath, 'utf8');
+            const data = JSON.parse(raw);
 
             data.users = data.users || {};
             data.users[user.id] = {
                 Username: user.tag,
-                UserID:   user.id,
+                UserID: user.id,
                 Join_Date: user.createdAt,
-                Badges:   badgeList,
+                Badges: badgeList,
 
                 Avatar_URL: `${user.displayAvatarURL()}`,
                 Banner_URL: `${user.bannerURL()}`,
@@ -492,9 +491,9 @@ client.on('messageCreate', async function (message){
 
         const channels = await message.guild.channels.fetch();
 
-        const textChannels = channels.filter(channel => channel.type === 0 || channel.type === 5 );
-        const voiceChannels = channels.filter(channel => channel.type === 2 || channel.type === 13 );
-        const categories = channels.filter(channel => channel.type === 4 );
+        const textChannels = channels.filter(channel => channel.type === 0 || channel.type === 5);
+        const voiceChannels = channels.filter(channel => channel.type === 2 || channel.type === 13);
+        const categories = channels.filter(channel => channel.type === 4);
         const total = channels.size;
 
         const roles = await message.guild.roles.fetch();
@@ -544,7 +543,7 @@ client.on('messageCreate', async function (message){
             const embed = new EmbedBuilder()
                 .setDescription(`ℹ️・\`foxo ${command}\` — ${commands[command]}`)
                 .setColor('#00B0F4');
-            
+
             await message.reply({ embeds: [embed] });
         }
     }
